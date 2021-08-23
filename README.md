@@ -1,0 +1,1 @@
+# webpack-sharp-image-minizer-loader
