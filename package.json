@@ -1,0 +1,35 @@
+{
+  "name": "webpack-sharp-image-minimizer-loader",
+  "version": "1.0.0",
+  "description": "Webpack loader to process images through sharp, minizer image and generater webp and avif image format",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">= 10.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dssstone/webpack-sharp-image-minizer-loader.git"
+  },
+  "keywords": [
+    "image",
+    "minizer",
+    "webp",
+    "avif",
+    "sharp"
+  ],
+  "author": "dengshuishi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dssstone/webpack-sharp-image-minizer-loader/issues"
+  },
+  "homepage": "https://github.com/dssstone/webpack-sharp-image-minizer-loader#readme",
+  "dependencies": {
+    "loader-utils": "^2.0.0",
+    "mime-types": "^2.1.27",
+    "schema-utils": "^3.0.0",
+    "sharp": "^0.29.0"
+  }
+}
