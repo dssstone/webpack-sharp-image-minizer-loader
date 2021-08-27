@@ -57,9 +57,11 @@ export default function loader (content) {
   const options = getOptions(loaderContext) || {}
   const limit = options.limit || 1000
   const context = options.context || this.rootContext
+  const minimizerOptions = options.minimizerOptions || {}
   const ext = path.extname(resourcePath).replace(/\./, '')
   const name = options.name || 'img/[name].[contenthash:7].[ext]'
   const returnFormatType = options.returnFormatType
+
   validate(schema, options, {
     name: 'Sharp Image Minizer Loader',
     baseDataPath: 'options',
@@ -75,21 +77,23 @@ export default function loader (content) {
   if (mimeTypes.has(ext)) {
     mimeTypes.delete(ext)
   }
-  const jgepOpts = {
+  const jpegOpts = {
+    quality: 80,
     mozjpeg: true
   }
   const pngOpts = {
+    quality: 60,
     compressionLevel: 8
   }
   let formatObj = {
-    quality: 80,
-    progressive: true
+    progressive: true,
+    ...minimizerOptions[ext]
   }
   if (ext === 'png') {
-    formatObj = Object.assign(formatObj, pngOpts)
+    formatObj = Object.assign({}, pngOpts, formatObj)
   }
   if (['jpg', 'jpeg'].includes(ext)) {
-    formatObj = Object.assign(formatObj, jgepOpts)
+    formatObj = Object.assign({}, jpegOpts, formatObj, minimizerOptions.jpeg)
   }
 
   const transformer = sharp(content, sharpOpt)
@@ -104,7 +108,7 @@ export default function loader (content) {
       loaderContext.emitFile(url, data)
       for (const mimeType of mimeTypes) {
         promiseSharp.push(
-          sharp(data, sharpOpt).toFormat(mimeType).toBuffer().then(function (data) {
+          sharp(data, sharpOpt).toFormat(mimeType, {...minimizerOptions[mimeType]}).toBuffer().then(function (data) {
             const name = url + '.' + mimeType
             loaderContext.emitFile(name, data)
           })
