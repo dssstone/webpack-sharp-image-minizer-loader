@@ -51,7 +51,7 @@ And run `webpack` via your preferred method.
 |     **[`limit`](#limit)**     |       `{Number}`            |                            `1000`                             | Specifying the maximum size of a file in bytes.                                     |
 |  **[`mimetype`](#mimetype)**  |     `{Boolean\|String}`     | based from [mime-types](https://github.com/jshttp/mime-types) | Sets the MIME type for the file to be transformed.                                  |
 |  **[`encoding`](#encoding)**  |     `{Boolean\|String}`     |                           `base64`                            | Specify the encoding which the file will be inlined with.                           |                 |
-|  **[`esModule`](#esmodule)**  |         `{Boolean}`         |                            `true`                             | Use ES modules syntax.      
+|  **[`esModule`](#esmodule)**  |         `{Boolean}`         |                            `false`                             | Use ES modules syntax.      
 |  **[`minimizerOptions`](#minimizerOptions)**  |         `{Object}`         |                            `{}`                             | configuration of image type.    
 
 ### `limit`
