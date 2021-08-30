@@ -4,6 +4,10 @@ import { getOptions, interpolateName } from 'loader-utils';
 import { validate } from 'schema-utils';
 import mime from 'mime-types';
 import schema from './options.json';
+
+const jpegType =  {
+  "image/jpeg": "jepg"
+}
 function getMimetype (mimetype, resourcePath) {
   if (typeof mimetype === 'boolean') {
     if (mimetype) {
@@ -78,63 +82,119 @@ export default function loader (content) {
     mimeTypes.delete(ext)
   }
   const jpegOpts = {
+    progressive: true,
     quality: 80,
     mozjpeg: true
   }
   const pngOpts = {
+    progressive: true,
     quality: 60,
     compressionLevel: 8
   }
-  let formatObj = {
-    progressive: true,
-    ...minimizerOptions[ext]
-  }
-  if (ext === 'png') {
-    formatObj = Object.assign({}, pngOpts, formatObj)
-  }
-  if (['jpg', 'jpeg'].includes(ext)) {
-    formatObj = Object.assign({}, jpegOpts, formatObj, minimizerOptions.jpeg)
-  }
-
-  const transformer = sharp(content, sharpOpt)
-  return transformer.toFormat(ext, formatObj).toBuffer().then(async function (data) {
-    const esModule = typeof options.esModule !== 'undefined' ? options.esModule : false
-    if (data.length > limit) {
-      const url = interpolateName(loaderContext, name, {
-        context,
-        content: data
-      })
-      const outputPath = url
-      loaderContext.emitFile(url, data)
-      for (const mimeType of mimeTypes) {
-        promiseSharp.push(
-          sharp(data, sharpOpt).toFormat(mimeType, {...minimizerOptions[mimeType]}).toBuffer().then(function (data) {
-            const name = url + '.' + mimeType
-            loaderContext.emitFile(name, data)
-          })
-        )
-      }
-      await Promise.all(promiseSharp)
-      const suffix = mimeTypes.has(returnFormatType) ? '.' + returnFormatType : ''
-      const publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath + suffix)}`
-
-      const str = `${esModule ? 'export default' : 'module.exports ='} ${publicPath};`
-      return loaderCallback(null, str)
-    } else {
-      const mimetype = getMimetype(options.mimetype, resourcePath)
-      const encoding = getEncoding(options.encoding)
-      const encodedData = getEncodedData(
-        mimetype,
-        encoding,
-        data
-      )
-      const str = `${
-        esModule ? 'export default' : 'module.exports ='
-      } ${JSON.stringify(encodedData)}`
-
-      return loaderCallback(null, str)
+  const esModule = typeof options.esModule !== 'undefined' ? options.esModule : false
+  const sharpStream = sharp(sharpOpt).rotate()
+  for (const mime of mimeTypes) {
+    const mimeType = mime.contentType(path.extname(resourcePath))
+    const suffix = jpegType[mimeType] || mime
+    let formatOpts = minimizerOptions[suffix] || {}
+    if (suffix === 'png') {
+      Object.assign(formatOpts, pngOpts)
     }
+    if (suffix === 'jpeg') {
+      Object.assign(formatOpts, jpegOpts)
+    }
+    promiseSharp.push(
+      sharpStream
+        .clone()
+        .toFormat(mime, formatOpts)
+        .toBuffer()
+        .then(function (data) {
+        // console.log(data)
+          return {
+            mime,
+            data
+          }
+        })
+    )
+  }
+  fs.createReadStream(resourcePath).pipe(sharpStream)
+
+  return Promise.all(promiseSharp).then(function (arr) {
+    let str = ''
+    let url = ''
+    for (let i = arr.length; i--;) {
+      const { mime, data } = arr[i]
+      if (i === arr.length - 1) {
+        if (data.length < limit) {
+          const mimetype = getMimetype(options.mimetype, resourcePath)
+          const encoding = getEncoding(options.encoding)
+          const encodedData = getEncodedData(
+            mimetype,
+            encoding,
+            data
+          )
+          str = `${
+            esModule ? 'export default' : 'module.exports ='
+          } ${JSON.stringify(encodedData)}`
+          // break , set encode data
+          break
+        } else {
+          url = interpolateName(loaderContext, name, {
+            context,
+            content: data
+          })
+          loaderContext.emitFile(url, data)
+          const suffix = mimeTypes.has(returnFormatType) ? '.' + returnFormatType : ''
+          const publicPath = `__webpack_public_path__ + ${JSON.stringify(url + suffix)}`
+
+          str = `${esModule ? 'export default' : 'module.exports ='} ${publicPath};`
+        }
+      } else {
+        const name = url + '.' + mime
+        loaderContext.emitFile(name, data)
+      }
+    }
+    return loaderCallback(null, str)
   })
+  // const transformer = sharp(content, sharpOpt)
+  // return transformer.toFormat(ext, formatObj).toBuffer().then(async function (data) {
+  //   const esModule = typeof options.esModule !== 'undefined' ? options.esModule : false
+  //   if (data.length > limit) {
+  //     const url = interpolateName(loaderContext, name, {
+  //       context,
+  //       content: data
+  //     })
+  //     const outputPath = url
+  //     loaderContext.emitFile(url, data)
+  //     for (const mimeType of mimeTypes) {
+  //       promiseSharp.push(
+  //         sharp(data, sharpOpt).toFormat(mimeType, {...minimizerOptions[mimeType]}).toBuffer().then(function (data) {
+  //           const name = url + '.' + mimeType
+  //           loaderContext.emitFile(name, data)
+  //         })
+  //       )
+  //     }
+  //     await Promise.all(promiseSharp)
+  //     const suffix = mimeTypes.has(returnFormatType) ? '.' + returnFormatType : ''
+  //     const publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath + suffix)}`
+
+  //     const str = `${esModule ? 'export default' : 'module.exports ='} ${publicPath};`
+  //     return loaderCallback(null, str)
+  //   } else {
+  //     const mimetype = getMimetype(options.mimetype, resourcePath)
+  //     const encoding = getEncoding(options.encoding)
+  //     const encodedData = getEncodedData(
+  //       mimetype,
+  //       encoding,
+  //       data
+  //     )
+  //     const str = `${
+  //       esModule ? 'export default' : 'module.exports ='
+  //     } ${JSON.stringify(encodedData)}`
+
+  //     return loaderCallback(null, str)
+  //   }
+  // })
 }
 
 

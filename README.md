@@ -271,6 +271,7 @@ module.exports = {
 Type: `Object`
 Default: `{}`
 options config of [sharp](https://sharp.pixelplumbing.com/api-output)
+
 **webpack.config.js**
 
 ```js
