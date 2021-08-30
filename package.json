@@ -1,6 +1,6 @@
 {
   "name": "webpack-sharp-image-minimizer-loader",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Webpack loader to process images through sharp, minizer image and generater webp and avif image format",
   "main": "index.js",
   "scripts": {
