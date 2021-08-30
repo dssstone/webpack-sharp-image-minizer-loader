@@ -98,17 +98,18 @@ export default function loader (content) {
   for (const mType of mimeTypes) {
     const mimeType = mime.contentType(path.extname(resourcePath))
     const suffix = jpegType[mimeType] || mType
+    const opts = {}
     let formatOpts = minimizerOptions[suffix] || {}
     if (suffix === 'png') {
-      Object.assign(formatOpts, pngOpts)
+      Object.assign(opts, pngOpts, formatOpts)
     }
     if (suffix === 'jpeg') {
-      Object.assign(formatOpts, jpegOpts)
+      Object.assign(opts, jpegOpts, formatOpts)
     }
     promiseSharp.push(
       sharpStream
         .clone()
-        .toFormat(mType, formatOpts)
+        .toFormat(mType, opts)
         .toBuffer()
         .then(function (data) {
         // console.log(data)
