@@ -82,6 +82,7 @@ export default function loader (content) {
   if (mimeTypes.has(ext)) {
     mimeTypes.delete(ext)
   }
+  mimeTypes.add(ext)
   const jpegOpts = {
     progressive: true,
     quality: 80,
