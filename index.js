@@ -94,9 +94,9 @@ export default function loader (content) {
   }
   const esModule = typeof options.esModule !== 'undefined' ? options.esModule : false
   const sharpStream = sharp(sharpOpt).rotate()
-  for (const mime of mimeTypes) {
+  for (const mType of mimeTypes) {
     const mimeType = mime.contentType(path.extname(resourcePath))
-    const suffix = jpegType[mimeType] || mime
+    const suffix = jpegType[mimeType] || mType
     let formatOpts = minimizerOptions[suffix] || {}
     if (suffix === 'png') {
       Object.assign(formatOpts, pngOpts)
@@ -107,12 +107,12 @@ export default function loader (content) {
     promiseSharp.push(
       sharpStream
         .clone()
-        .toFormat(mime, formatOpts)
+        .toFormat(mType, formatOpts)
         .toBuffer()
         .then(function (data) {
         // console.log(data)
           return {
-            mime,
+            mime: mType,
             data
           }
         })
