@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import sharp from 'sharp';
 import { getOptions, interpolateName } from 'loader-utils';
 import { validate } from 'schema-utils';
