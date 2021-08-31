@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "limit": {
+      "description": "Enables/Disables transformation target file into base64 URIs, default 1000K",
+      "type": ["boolean", "number", "string"]
+    },
+    "encoding": {
+      "description": "Specify the encoding which the file will be in-lined with.",
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "enum": [
+            "utf8",
+            "utf16le",
+            "latin1",
+            "base64",
+            "hex",
+            "ascii",
+            "binary",
+            "ucs2"
+          ]
+        }
+      ]
+    },
+    "mimetype": {
+      "description": "The MIME type for the file to be transformed",
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "returnFormatType": {
+      "description": "The type for the links",
+      "type": "string"
+    },
+    "esModule": {
+      "description": "Whether generates JS modules that use the ES modules syntax, default false",
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}
